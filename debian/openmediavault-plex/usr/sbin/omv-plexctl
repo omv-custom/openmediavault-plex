@@ -1,0 +1,90 @@
+#!/bin/bash
+
+detect_install_type() {
+    if python3 -c "from plexpy.docker_utils import PlexDocker; print(PlexDocker().is_plex_in_docker())" | grep -q "True"; then
+        echo "docker"
+    elif dpkg -l plexmediaserver >/dev/null 2>&1; then
+        echo "native"
+    else
+        echo "none"
+    fi
+}
+
+# Helper script for Plex plugin
+
+case "$1" in
+    get-install-type)
+        detect_install_type
+        ;;
+    docker-control)
+        ACTION=$2
+        python3 -c "from plexpy.docker_utils import PlexDocker; PlexDocker().control_docker_plex('$ACTION')"
+        ;;
+    docker-update)
+        python3 -c "from plexpy.docker_utils import PlexDocker; PlexDocker().update_docker_plex()"
+        ;;
+    docker-info)
+        python3 -c "from plexpy.docker_utils import PlexDocker; import json; print(json.dumps(PlexDocker().get_docker_plex_info()))"
+        ;;
+    get-library-stats)
+        python3 -c "from plexpy.plex_api import PlexAPI; import json; print(json.dumps(PlexAPI().get_library_stats()))"
+        ;;
+    get-active-sessions)
+        python3 -c "from plexpy.plex_api import PlexAPI; import json; print(json.dumps(PlexAPI().get_active_sessions()))"
+        ;;
+    update-settings)
+        SETTINGS=$(echo "$2" | python3 -c "import sys, json; print(json.dumps(json.load(sys.stdin)))")
+        python3 -c "from plexpy.plex_api import PlexAPI; PlexAPI().update_settings($SETTINGS)"
+        echo "{\"status\":\"success\"}"
+        ;;
+    get-version)
+        dpkg-query -W -f='${Version}' plexmediaserver 2>/dev/null || echo "Not installed"
+        ;;
+    get-stats)
+        # Get CPU, memory and disk usage
+        CPU=$(top -bn1 | grep plex | awk '{print $9}' | head -n1)
+        MEM=$(ps -eo pmem,comm | grep plex | awk '{s+=$1} END {print s}')
+        DISK=$(du -sh /var/lib/plexmediaserver/ 2>/dev/null | awk '{print $1}')
+        echo "{\"cpu\":\"$CPU\",\"memory\":\"$MEM\",\"disk\":\"$DISK\"}"
+        ;;
+    check-update)
+        CURRENT=$(dpkg-query -W -f='${Version}' plexmediaserver 2>/dev/null)
+        LATEST=$(curl -s "https://plex.tv/api/downloads/5.json" | jq -r '.computer.Linux.version')
+        if [ "$CURRENT" != "$LATEST" ]; then
+            echo "{\"update\":true,\"current\":\"$CURRENT\",\"latest\":\"$LATEST\"}"
+        else
+            echo "{\"update\":false,\"current\":\"$CURRENT\"}"
+        fi
+        ;;
+    *)
+        INSTALL_TYPE=$(detect_install_type)
+
+        if [ "$INSTALL_TYPE" = "docker" ]; then
+            case "$1" in
+                get-version)
+                    python3 -c "from plexpy.docker_utils import PlexDocker; import json; print(json.dumps(PlexDocker().get_docker_plex_info().get('image', 'unknown')))"
+                    ;;
+                get-stats)
+                    # Statystyki dla Dockera
+                    CONTAINER_ID=$(docker ps -q --filter "name=plex")
+                    if [ -n "$CONTAINER_ID" ]; then
+                        CPU=$(docker stats --no-stream --format "{{.CPUPerc}}" $CONTAINER_ID | tr -d '%')
+                        MEM=$(docker stats --no-stream --format "{{.MemPerc}}" $CONTAINER_ID | tr -d '%')
+                        DISK=$(docker exec $CONTAINER_ID du -sh /config 2>/dev/null | awk '{print $1}')
+                        echo "{\"cpu\":\"$CPU\",\"memory\":\"$MEM\",\"disk\":\"$DISK\"}"
+                    else
+                        echo "{\"cpu\":\"0\",\"memory\":\"0\",\"disk\":\"0\"}"
+                    fi
+                    ;;
+                *)
+                    echo "Unsupported command for docker installation"
+                    exit 1
+                    ;;
+            esac
+        else
+            echo "Usage: $0 {get-version|get-stats|check-update}"
+        fi
+        ;;
+esac
+
+exit 0

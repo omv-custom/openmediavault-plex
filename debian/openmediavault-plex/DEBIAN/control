@@ -1,0 +1,17 @@
+Package: openmediavault-plex
+Version: 1.0
+Architecture: all
+Maintainer: Your Name <your@email.com>
+Installed-Size: 73
+Depends: openmediavault (>= 7.0), passwd, python3-requests, python3-psutil, jq, curl, xmlstarlet, salt-common, rsyslog, logrotate
+Section: net
+Priority: optional
+Homepage: https://www.plex.tv/
+Description: Advanced Plex Media Server plugin for OpenMediaVault 7
+ Provides seamless integration of Plex Media Server with OMV 7.
+ Features include:
+  * Docker and native installation support
+  * Live session monitoring
+  * Automatic updates
+  * Resource usage statistics
+  * Library management

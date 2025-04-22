@@ -1,0 +1,15 @@
+2f26d3b6d83b2f7e549aa7005a755a2c  usr/lib/plexpy/docker_utils.py
+4d79ba72ff31f9fdaa56f2b0fa17382f  usr/lib/plexpy/plex_api.py
+d41d8cd98f00b204e9800998ecf8427e  usr/lib/plexpy/plex_monitor.py
+0a2d7fa95abc4b9a8be170fba275bdd6  usr/sbin/omv-plexctl
+33895a46fed812e8657589fafbe520bc  usr/share/doc/openmediavault-plex/changelog.gz
+28e9588a289aae8910b107bcec8bb252  usr/share/doc/openmediavault-plex/copyright
+6ebb81e802ec225427bff2e8d904a8bf  usr/share/openmediavault/confdb/create.d/conf.service.plex.sh
+10a2c357f8d3b2b096c95ea9e089227c  usr/share/openmediavault/datamodels/conf.service.plex.json
+6560c4aeba5490261b0b058939e66703  usr/share/openmediavault/datamodels/rpc.plex.json
+dd4b1a60e6ea77218a468997c2e3aeea  usr/share/openmediavault/engined/module/plex.inc
+f542ecc08288165bed650b81b8ddf05d  usr/share/openmediavault/engined/rpc/plex.inc
+21a10e4b54efd04cec79b9cdf9626a19  usr/share/openmediavault/workbench/component.d/omv-module-plex-form-page.yaml
+2d94a43e4275723f9116849c560e15b6  usr/share/openmediavault/workbench/log.d/plex.yaml
+022b579bfb864ce0308610439a40ad04  usr/share/openmediavault/workbench/navigation.d/services.plex.yaml
+f20aa2c4d5b83cbca992ce392f569d52  usr/share/openmediavault/workbench/route.d/services.plex.yaml

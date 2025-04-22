@@ -1,0 +1,60 @@
+version: "1.0"
+type: log
+data:
+  id: plexmediaserver
+  text: _("Plex Media Server")
+  icon: "plex"
+  columns:
+    - name: _("Timestamp")
+      sortable: true
+      prop: "ts"
+      cellTemplateName: "localeDateTime"
+      flexGrow: 1
+    - name: _("Severity")
+      sortable: true
+      prop: "severity"
+      flexGrow: 1
+      cellTemplateName: "badge"
+      props:
+        color:
+          "error": "red"
+          "warning": "orange"
+          "info": "blue"
+          "debug": "gray"
+    - name: _("Component")
+      sortable: true
+      prop: "component"
+      flexGrow: 1
+    - name: _("Message")
+      sortable: false
+      prop: "message"
+      flexGrow: 3
+      cellTemplateName: "text"
+  sorters:
+    - dir: "desc"
+      prop: "ts"
+  request:
+    service: "LogFile"
+    method: "getList"
+    params:
+      id: "plexmediaserver"
+  actions:
+    - id: "refresh"
+      icon: "mdi-refresh"
+      tooltip: _("Refresh")
+    - id: "download"
+      icon: "mdi-download"
+      tooltip: _("Download Log")
+      method: "download"
+  filters:
+    - name: "severity"
+      text: _("Severity")
+      options:
+        - text: _("All")
+          value: ""
+        - text: _("Error")
+          value: "error"
+        - text: _("Warning")
+          value: "warning"
+        - text: _("Info")
+          value: "info"

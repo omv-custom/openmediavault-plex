@@ -1,0 +1,97 @@
+#!/bin/bash
+set -e
+
+. /etc/default/openmediavault
+. /usr/share/openmediavault/scripts/helper-functions
+
+# Configuration paths
+OMV_CONFIG_XPATH="/config/services/plex"
+PLEX_CONFIG_DIR="/var/lib/plexmediaserver"
+PLEX_LOG_FILE="/var/log/plexmediaserver.log"
+PLEX_USER="plex"
+PLEX_GROUP="plex"
+RED="\e[31m"
+GREEN="\e[32m"
+ENDCOLOR="\e[0m"
+
+case "$1" in
+    configure)
+        # Activate package triggers
+        dpkg-trigger update-workbench
+
+        # Create plex user and group if they don't exist
+        if ! getent passwd "${PLEX_USER}" >/dev/null; then
+            echo "Creating ${PLEX_USER} system user..."
+            adduser --system --no-create-home \
+                --ingroup nogroup \
+                --disabled-password \
+                --shell /bin/false \
+                "${PLEX_USER}"
+        else
+            echo "User ${PLEX_USER} already exists, skipping creation."
+        fi
+
+        if ! getent group "${PLEX_GROUP}" >/dev/null; then
+            echo "Creating ${PLEX_GROUP} group..."
+            addgroup --system "${PLEX_GROUP}"
+        else
+            echo "Group ${PLEX_GROUP} already exists, skipping creation."
+        fi
+
+        # Add user to group if not already member
+        if ! id -nG "${PLEX_USER}" | grep -qw "${PLEX_GROUP}"; then
+            usermod -a -G "${PLEX_GROUP}" "${PLEX_USER}"
+        fi
+
+        echo "${GREEN}Updating configuration database ...${ENDCOLOR}"
+        omv-confdbadm create "conf.service.plex"
+        if [ -n "$2" ]; then
+            omv-confdbadm migrate "conf.service.plex" "${2}"
+        fi
+
+
+        # Create and configure directories
+        mkdir -p "${PLEX_CONFIG_DIR}"
+        chown "${PLEX_USER}:${PLEX_GROUP}" "${PLEX_CONFIG_DIR}"
+        chmod 755 "${PLEX_CONFIG_DIR}"
+
+        # Configure Plex logging
+        echo "Configuring Plex logging..."
+        touch "${PLEX_LOG_FILE}"
+        chown "${PLEX_USER}:${PLEX_GROUP}" "${PLEX_LOG_FILE}"
+        chmod 644 "${PLEX_LOG_FILE}"
+
+        # Rsyslog configuration
+        cat > /etc/rsyslog.d/30-plex.conf <<EOF
+if \$programname == 'plexmediaserver' then ${PLEX_LOG_FILE}
+& stop
+EOF
+
+        # Logrotate configuration
+        cat > /etc/logrotate.d/plexmediaserver <<EOF
+${PLEX_LOG_FILE} {
+    weekly
+    missingok
+    rotate 4
+    compress
+    delaycompress
+    notifempty
+    create 644 ${PLEX_USER} ${PLEX_GROUP}
+}
+EOF
+
+        # Apply logging configuration
+        # systemctl restart rsyslog
+        # omv-salt deploy run rsyslog
+
+        echo "Plex Media Server plugin configured successfully."
+        ;;
+    abort-upgrade|abort-remove|abort-deconfigure)
+        ;;
+    *)
+        echo "postinst called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

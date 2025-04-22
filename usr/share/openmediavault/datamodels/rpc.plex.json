@@ -1,0 +1,27 @@
+[
+    {
+        "type": "rpc",
+        "id": "rpc.plex.setsettings",
+        "params": {
+            "type": "object",
+            "properties": {
+                "enable": {"type": "boolean", "required": true},
+                "installation_type": {"type": "string", "enum": ["docker", "native"], "required": true},
+                "port": {"type": "integer", "minimum": 1024, "maximum": 65535, "required": true},
+                "remote_access": {"type": "boolean", "default": true},
+                "auto_update": {"type": "boolean", "default": false},
+                "verbose_logging": {"type": "boolean", "default": false},
+                "ip_address": {"type": "string", "format": "ipv4", "default": "0.0.0.0"},
+                "transcoder_path": {"type": "string", "default": "/tmp"},
+                "claim_token": {"type": "string", "default": ""}
+            }
+        },
+        "result": {
+            "type": "object",
+            "properties": {
+                "status": {"type": "boolean"},
+                "message": {"type": "string"}
+            }
+        }
+    }
+]

@@ -1,0 +1,6 @@
+version: "1.0"
+type: route
+data:
+  url: "/services/plex"
+  title: _("Plex Media Server")
+  component: omv-module-plex-form-page

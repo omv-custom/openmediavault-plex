@@ -1,0 +1,40 @@
+#!/bin/bash
+set -e
+
+. /usr/share/debconf/confmodule
+. /usr/share/openmediavault/scripts/helper-functions
+
+case "$1" in
+    remove|purge)
+        echo "Cleaning up Plex logging configuration..."
+
+        remove_action
+
+        omv_config_delete "/config/services/plex"
+        
+        # Remove rsyslog configuration
+        if [ -f /etc/rsyslog.d/30-plex.conf ]; then
+            rm -f /etc/rsyslog.d/30-plex.conf
+            systemctl restart rsyslog
+        fi
+
+        # Remove logrotate configuration
+        rm -f /etc/logrotate.d/plexmediaserver
+
+        # Clean up log files (keep existing logs)
+        if [ -f /var/log/plexmediaserver.log ]; then
+            echo "Plex log file preserved at /var/log/plexmediaserver.log"
+        fi
+
+        # Update OMV configuration
+        omv-salt deploy run rsyslog
+        ;;
+    upgrade|failed-upgrade|disappear)
+        ;;
+    *)
+        echo "prerm called with unknown argument \`$1'" >&2
+        exit 1
+        ;;
+esac
+
+exit 0

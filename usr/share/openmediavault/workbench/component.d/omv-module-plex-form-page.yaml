@@ -1,0 +1,145 @@
+version: "1.0"
+type: component
+data:
+  name: omv-module-plex-form-page
+  type: tabsPage
+  config:
+    tabs:
+      # Zakładka podstawowych ustawień
+      - type: form
+        label: _("Basic Settings")
+        config:
+          request:
+            service: plex
+            get:
+              method: getSettings
+            post:
+              method: setSettings
+          fields:
+            - type: checkbox
+              name: enable
+              label: _("Enable Plex Media Server")
+              value: false
+              tooltip: _("Enable or disable the Plex service")
+
+            - type: select
+              name: installation_type
+              label: _("Installation Type")
+              store:
+               data:
+                 - ['docker', _('Docker')]
+                 - ['native', _('Native')]
+              value: "docker"
+              required: true
+
+            - type: numberInput
+              name: port
+              label: _("Web Interface Port")
+              min: 1024
+              max: 65535
+              value: 32400
+              required: true
+              validators:
+                - type: "required"
+                - type: "portAvailable"
+
+          buttons:
+            - template: submit
+            - template: cancel
+              execute:
+                type: url
+                url: "/services/plex"
+
+      # Zakładka ustawień sieciowych
+      - type: form
+        label: _("Network Settings")
+        config:
+          request:
+            service: Plex
+            get:
+              method: getSettings
+            post:
+              method: setSettings
+          fields:
+            - type: textInput
+              name: ip_address
+              label: _("IP Address")
+              hint: _("Leave as 0.0.0.0 for all interfaces")
+              value: "0.0.0.0"
+              validators:
+                - type: "ipv4"
+
+            - type: checkbox
+              name: remote_access
+              label: _("Enable Remote Access")
+              tooltip: _("Allow access from outside your local network")
+              value: true
+
+          buttons:
+            - template: submit
+            - type: iconButton
+              icon: mdi-lan-connect
+              text: _("Test Connection")
+              tooltip: _("Test remote access configuration")
+              execute:
+                type: taskDialog
+                taskDialog:
+                  config:
+                    title: _("Testing Connection")
+                    startOnInit: true
+                    request:
+                      service: Plex
+                      method: testConnection
+                  successUrl: /services/plex
+
+      # Zakładka zaawansowanych ustawień
+      - type: form
+        label: _("Advanced Settings")
+        config:
+          request:
+            service: Plex
+            get:
+              method: getSettings
+            post:
+              method: setSettings
+          fields:
+            - type: textInput
+              name: transcoder_path
+              label: _("Transcoder Temporary Directory")
+              value: "/tmp"
+              hint: _("Path for temporary transcoder files")
+
+            - type: textInput
+              name: claim_token
+              label: _("Plex Claim Token")
+              hint: _("Required for first-time server setup")
+              value: ""
+
+            - type: checkbox
+              name: verbose_logging
+              label: _("Verbose Logging")
+              tooltip: _("Enable detailed debug logging")
+              value: false
+
+            - type: checkbox
+              name: auto_update
+              label: _("Automatic Updates")
+              tooltip: _("Automatically update Plex Media Server")
+              value: false
+
+          buttons:
+            - template: submit
+            - type: iconButton
+              icon: mdi-update
+              text: _("Force Update")
+              tooltip: _("Manually update Plex now")
+              execute:
+                type: taskDialog
+                taskDialog:
+                  config:
+                    title: _("Updating Plex")
+                    startOnInit: true
+                    request:
+                      service: Plex
+                      method: forceUpdate
+                  successUrl: /services/plex

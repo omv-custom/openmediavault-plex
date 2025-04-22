@@ -1,0 +1,68 @@
+{
+    "type": "config",
+    "id": "conf.service.plex",
+    "title": "plex",
+    "queryinfo": {
+        "xpath": "//services/plex",
+        "iterable": false
+    },
+    "properties": {
+        "enable": {
+            "type": "boolean",
+            "default": false
+        },
+        "installation_type": {
+            "type": "string",
+            "enum": ["docker", "native"],
+            "default": "docker"
+        },
+        "verbose_logging": {
+            "type": "boolean",
+            "default": false
+        },
+        "ip_address": {
+            "type": "string",
+            "format": "ipv4",
+            "default": "0.0.0.0"
+        },
+        "transcoder_path": {
+            "type": "string",
+            "default": "/tmp"
+        },
+        "docker_image": {
+            "type": "string",
+            "default": "plexinc/pms-docker"
+        },
+        "docker_tag": {
+            "type": "string",
+            "default": "latest"
+        },
+        "docker_network": {
+            "type": "string",
+            "enum": ["host", "bridge"],
+            "default": "host"
+        },
+        "port": {
+            "type": "integer",
+            "minimum": 1024,
+            "maximum": 65535,
+            "default": 32400
+        },
+        "remote_access": {
+            "type": "boolean",
+            "default": true
+        },
+        "auto_update": {
+            "type": "boolean",
+            "default": false
+        },
+        "transcoder_path": {
+            "type": "string",
+            "default": "/tmp"
+        },
+        "claim_token": {
+            "type": "string",
+            "default": ""
+        }
+    }
+}

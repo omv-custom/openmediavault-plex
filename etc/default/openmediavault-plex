@@ -1,0 +1,8 @@
+# Tryb instalacji Plex: 'native' lub 'docker'
+PLEX_INSTALL_MODE="auto"
+
+# Konfiguracja Dockera (jeśli używany)
+PLEX_DOCKER_IMAGE="plexinc/pms-docker"
+PLEX_DOCKER_TAG="latest"
+PLEX_DOCKER_NAME="plex"
+PLEX_DOCKER_NETWORK="host"
